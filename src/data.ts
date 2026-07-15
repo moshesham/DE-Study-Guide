@@ -4,6 +4,7 @@ export interface Topic {
   category: string;
   seniorSignal: string;
   code: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
 }
 
 export const studyGuideData: Topic[] = [
@@ -41,7 +42,8 @@ def read_from_db(conn: sqlite3.Connection, min_age: int) -> List[Tuple]:
     with conn:
         cursor = conn.cursor()
         cursor.execute(select_query, (min_age,))
-        return cursor.fetchall()`
+        return cursor.fetchall()`,
+    difficulty: "Easy"
   },
   {
     id: "api-pulling",
@@ -71,7 +73,8 @@ def fetch_data_from_api(url: str, timeout_sec: int = 5) -> dict:
         raise APITimeoutError(f"API timed out: {e}")
     except requests.exceptions.RequestException as e:
         # Fatal error, do not retry
-        raise RuntimeError(f"Fatal API error: {e}")`
+        raise RuntimeError(f"Fatal API error: {e}")`,
+    difficulty: "Medium"
   },
   {
     id: "s3-load-write",
@@ -107,7 +110,8 @@ def write_parquet_to_s3(df: pd.DataFrame, s3_path: str):
         compression='snappy',
         partition_cols=['dt'], # Hive-style partitioning
         index=False
-    )`
+    )`,
+    difficulty: "Medium"
   },
   {
     id: "logging-config",
@@ -145,7 +149,8 @@ db_password = os.getenv("DB_PASSWORD") # Never hardcode secrets!
 
 # Inject a correlation ID for tracing a specific pipeline run
 run_id = str(uuid4())
-logger.info("Pipeline started", extra={"correlation_id": run_id})`
+logger.info("Pipeline started", extra={"correlation_id": run_id})`,
+    difficulty: "Easy"
   },
   {
     id: "dataframe-wrangling",
@@ -175,7 +180,8 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     # 4. Rank categories by total amount (like SQL ROW_NUMBER() or RANK())
     agg_df['rank'] = agg_df['total_amount'].rank(method='dense', ascending=False)
     
-    return agg_df.sort_values('rank')`
+    return agg_df.sort_values('rank')`,
+    difficulty: "Medium"
   },
   {
     id: "concurrency",
@@ -199,7 +205,8 @@ def fetch_urls_concurrently(urls: List[str], max_workers: int = 5) -> List[dict]
         for result in executor.map(fetch_single, urls):
             results.append(result)
             
-    return results`
+    return results`,
+    difficulty: "Hard"
   },
   {
     id: "oop-structure",
@@ -235,7 +242,8 @@ def get_loader(file_type: str) -> DataLoader:
     return loaders[file_type]
 
 # Usage
-# df = get_loader("parquet").load("data.parquet")`
+# df = get_loader("parquet").load("data.parquet")`,
+    difficulty: "Hard"
   },
   {
     id: "generators-decorators",
@@ -271,7 +279,8 @@ def process_large_file_in_chunks(filepath: str, chunk_size: int = 1000) -> Gener
 
 # Usage:
 # for chunk in process_large_file_in_chunks("huge_data.txt"):
-#     write_to_db(chunk)`
+#     write_to_db(chunk)`,
+    difficulty: "Hard"
   },
   {
     id: "pytest-mocking",
@@ -308,7 +317,8 @@ def test_s3_upload():
     
     # Assert successful operation
     response = s3.get_object(Bucket='test-bucket', Key='data.txt')
-    assert response['Body'].read() == b'hello world'`
+    assert response['Body'].read() == b'hello world'`,
+    difficulty: "Medium"
   },
   {
     id: "airflow-taskflow",
@@ -371,7 +381,8 @@ def api_ingestion_dag():
     transform_and_load(extraction_metadata)
 
 # Instantiate the DAG
-dag_instance = api_ingestion_dag()`
+dag_instance = api_ingestion_dag()`,
+    difficulty: "Medium"
   },
   {
     id: "airflow-jinja",
@@ -414,7 +425,8 @@ with DAG(
     end_task = EmptyOperator(task_id='end')
 
     # Traditional Bitshift Dependencies
-    start_task >> process_task >> end_task`
+    start_task >> process_task >> end_task`,
+    difficulty: "Hard"
   }
 ];
 
