@@ -1,0 +1,4 @@
+# Jekyll configuration for GitHub Pages
+# We include .nojekyll to ensure GitHub Pages serves the Vite React app without Jekyll processing
+include:
+  - ".nojekyll"

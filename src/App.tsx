@@ -56,6 +56,36 @@ export default function App() {
     }
   };
 
+  const handlePrev = () => {
+    if (showTips) {
+      setShowTips(false);
+      setActiveTopic(studyGuideData[studyGuideData.length - 1]);
+    } else {
+      const currentIndex = studyGuideData.findIndex(t => t.id === activeTopic.id);
+      if (currentIndex > 0) {
+        setActiveTopic(studyGuideData[currentIndex - 1]);
+      } else {
+        setShowTips(true);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      if (e.key === 'ArrowRight') {
+        handleNext();
+      } else if (e.key === 'ArrowLeft') {
+        handlePrev();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeTopic, showTips]);
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-slate-50 font-sans text-slate-900">
       {/* Sidebar */}
@@ -143,61 +173,69 @@ export default function App() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between shadow-sm shrink-0">
+        <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-md">
               {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-bold text-slate-800 line-clamp-1">
+              <h1 className="text-xl font-serif font-bold text-slate-900 line-clamp-1">
                 {showTips ? "Interview Tips" : activeTopic.title}
               </h1>
-              <p className="text-xs text-slate-500 line-clamp-1">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-widest line-clamp-1 mt-0.5">
                 {showTips ? "Key strategies to keep in mind during your coding loop." : `Category: ${activeTopic.category}`}
               </p>
             </div>
             {/* Mobile Title */}
-            <div className="sm:hidden text-sm font-bold text-slate-800 line-clamp-1">
+            <div className="sm:hidden text-sm font-serif font-bold text-slate-900 line-clamp-1">
               {showTips ? "Tips" : activeTopic.title}
             </div>
           </div>
           <div className="flex items-center gap-4">
-            {!showTips && <span className="hidden sm:inline-flex text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 uppercase tracking-tight">Senior-Level Pattern</span>}
-            <button 
-              onClick={handleNext}
-              className="bg-slate-900 text-white px-3 md:px-4 py-1.5 md:py-2 rounded text-xs md:text-sm font-medium hover:bg-slate-800 transition-colors whitespace-nowrap"
-            >
-              Next
-            </button>
+            {!showTips && <span className="hidden sm:inline-flex text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-1 border border-slate-200 uppercase tracking-tight">Senior-Level Pattern</span>}
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={handlePrev}
+                className="bg-white border border-slate-300 text-slate-700 px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium hover:bg-slate-50 transition-colors whitespace-nowrap shadow-sm"
+              >
+                Prev
+              </button>
+              <button 
+                onClick={handleNext}
+                className="bg-slate-900 border border-slate-900 text-white px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium hover:bg-slate-800 transition-colors whitespace-nowrap shadow-sm"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </header>
 
         {/* View Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#F9FAFB]">
           {showTips ? (
             <div className="max-w-4xl mx-auto space-y-6">
-              <h2 className="text-2xl font-bold text-slate-800 mb-6">Study Tips</h2>
+              <h2 className="text-3xl font-serif font-bold text-slate-900 mb-8 border-b border-slate-200 pb-4">Study Tips</h2>
               {tipsData.map((tip, idx) => (
-                <section key={idx} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-                  <h3 className="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Lightbulb className="w-4 h-4" />
+                <section key={idx} className="bg-white border border-slate-300 p-6 shadow-sm">
+                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4 text-slate-600" />
                     {tip.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-slate-600">{tip.description}</p>
+                  <p className="text-base leading-relaxed text-slate-700 font-serif">{tip.description}</p>
                 </section>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 h-full">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 h-full max-w-7xl mx-auto">
               {/* Code Block Column */}
               <div className="xl:col-span-8 flex flex-col h-full min-h-[500px]">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Python Snippet</span>
-                  <span className="text-xs text-slate-400">main.py</span>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Python Snippet</span>
+                  <span className="text-xs font-mono text-slate-400">main.py</span>
                 </div>
-                <div className="flex-1 bg-slate-950 rounded-xl font-mono text-[13px] leading-relaxed text-slate-300 shadow-2xl relative border border-slate-800 overflow-hidden flex flex-col">
+                <div className="flex-1 bg-slate-900 font-mono text-[13px] leading-relaxed text-slate-300 shadow-xl relative border border-slate-800 overflow-hidden flex flex-col">
                   <div className="absolute top-0 right-0 p-4 text-slate-600 z-10 pointer-events-none">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                   </div>
@@ -217,18 +255,16 @@ export default function App() {
 
               {/* Insight Panel Column */}
               <div className="xl:col-span-4 flex flex-col space-y-6">
-                <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-                  <h3 className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1a1 1 0 112 0v1a1 1 0 11-2 0zM13.536 14.95a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zM16.121 17.243L19 20l-1.243 1.243-2.879-2.879 1.243-1.243zM7.172 16.121L4.293 19 3.05 17.757l2.879-2.879 1.243 1.243z"></path></svg>
+                <section className="bg-white border border-slate-300 p-6 shadow-sm">
+                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest mb-5 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-slate-500" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1a1 1 0 112 0v1a1 1 0 11-2 0zM13.536 14.95a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zM16.121 17.243L19 20l-1.243 1.243-2.879-2.879 1.243-1.243zM7.172 16.121L4.293 19 3.05 17.757l2.879-2.879 1.243 1.243z"></path></svg>
                     Senior Insight
                   </h3>
-                  <ul className="space-y-4">
+                  <ul className="space-y-5">
                     {activeTopic.seniorSignal.split('. ').map((point, i) => point.trim() ? (
-                      <li key={i} className="flex gap-3">
-                        <div className="mt-1 w-4 h-4 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center">
-                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-600"></div>
-                        </div>
-                        <p className="text-xs leading-relaxed text-slate-600">
+                      <li key={i} className="flex gap-4">
+                        <div className="mt-1.5 w-1.5 h-1.5 bg-slate-400 flex-shrink-0"></div>
+                        <p className="text-[15px] leading-relaxed text-slate-700 font-serif">
                           {point.trim() + (point.endsWith('.') ? '' : '.')}
                         </p>
                       </li>
@@ -236,28 +272,28 @@ export default function App() {
                   </ul>
                 </section>
 
-                <section className="bg-indigo-900 rounded-xl p-5 text-indigo-50 shadow-lg mt-auto">
-                  <h3 className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest mb-3">Self-Check Question</h3>
-                  <p className="text-sm italic font-medium leading-snug">
+                <section className="bg-slate-900 p-6 text-slate-100 shadow-lg mt-auto border-t-4 border-slate-700">
+                  <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Self-Check Question</h3>
+                  <p className="text-[15px] font-serif italic leading-snug">
                     {activeTopic.id === 'api-pulling' 
                       ? "\"What happens if the API times out mid-pull after successfully pulling 50% of the records?\"" 
                       : "\"How would you test this component in isolation without relying on the actual external service?\""}
                   </p>
-                  <div className="mt-4 pt-4 border-t border-indigo-800">
-                    <p className="text-[11px] opacity-80 leading-relaxed">
-                      Focus on <span className="underline decoration-indigo-400">resilience</span> and testability. Make sure to clearly state your assumptions.
+                  <div className="mt-5 pt-4 border-t border-slate-700/50">
+                    <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                      Focus on <span className="underline decoration-slate-500 underline-offset-2">resilience</span> and testability. Make sure to clearly state your assumptions.
                     </p>
                   </div>
                 </section>
 
-                <div className="mt-6 flex gap-2">
-                  <div className="flex-1 bg-white border border-slate-200 rounded-lg p-3 text-center">
-                    <span className="block text-lg font-bold text-slate-800">{studyGuideData.findIndex(t => t.id === activeTopic.id) + 1}/{studyGuideData.length}</span>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Progress</span>
+                <div className="mt-6 flex gap-3">
+                  <div className="flex-1 bg-white border border-slate-300 p-4 text-center shadow-sm">
+                    <span className="block text-xl font-serif font-bold text-slate-900">{studyGuideData.findIndex(t => t.id === activeTopic.id) + 1} <span className="text-slate-400 text-base font-normal">/ {studyGuideData.length}</span></span>
+                    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1 block">Progress</span>
                   </div>
-                  <div className="flex-1 bg-white border border-slate-200 rounded-lg p-3 text-center">
-                    <span className="block text-lg font-bold text-emerald-600">Ready</span>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Status</span>
+                  <div className="flex-1 bg-white border border-slate-300 p-4 text-center shadow-sm">
+                    <span className="block text-xl font-serif font-bold text-slate-900">Active</span>
+                    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1 block">Status</span>
                   </div>
                 </div>
               </div>
