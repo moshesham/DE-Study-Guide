@@ -1,0 +1,6 @@
+{
+  "name": "Data Engineering Study Guide",
+  "description": "Python-based coding interview study guide covering databases, APIs, S3, dataframes, airflow and more.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
