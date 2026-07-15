@@ -5,6 +5,8 @@ export interface Topic {
   seniorSignal: string;
   code: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
+  taskPrompt: string;
+  hints: string[];
 }
 
 export const studyGuideData: Topic[] = [
@@ -43,7 +45,9 @@ def read_from_db(conn: sqlite3.Connection, min_age: int) -> List[Tuple]:
         cursor = conn.cursor()
         cursor.execute(select_query, (min_age,))
         return cursor.fetchall()`,
-    difficulty: "Easy"
+    difficulty: "Easy",
+    taskPrompt: "Write a Python snippet that queries a PostgreSQL/SQLite database to find users older than a given age. Ensure the query is secure against SQL injection.",
+    hints: ["Use a standard DBAPI driver (like psycopg2 or sqlite3).","Always use parameterized queries (e.g., ? or %s) rather than f-strings.","Use the connection as a context manager (with statement) to ensure it closes properly."]
   },
   {
     id: "api-pulling",
@@ -74,7 +78,9 @@ def fetch_data_from_api(url: str, timeout_sec: int = 5) -> dict:
     except requests.exceptions.RequestException as e:
         # Fatal error, do not retry
         raise RuntimeError(f"Fatal API error: {e}")`,
-    difficulty: "Medium"
+    difficulty: "Medium",
+    taskPrompt: "Implement a function that fetches data from an API endpoint. It must retry up to 3 times for transient errors (like timeouts) using exponential backoff, but fail immediately on fatal errors.",
+    hints: ["The 'tenacity' library is perfect for abstracting retry logic.","Use @retry(wait=wait_exponential(...), stop=stop_after_attempt(3)).","Catch specific timeout exceptions for retries and generic RequestExceptions for fatal errors."]
   },
   {
     id: "s3-load-write",
@@ -111,7 +117,9 @@ def write_parquet_to_s3(df: pd.DataFrame, s3_path: str):
         partition_cols=['dt'], # Hive-style partitioning
         index=False
     )`,
-    difficulty: "Medium"
+    difficulty: "Medium",
+    taskPrompt: "Using pandas and awswrangler (or boto3 + pandas), write a DataFrame as a Parquet file to an S3 bucket. Partition the data by a 'dt' (date) column and apply Snappy compression.",
+    hints: ["awswrangler (wr) provides a clean Pandas-to-AWS interface (e.g., wr.s3.to_parquet).","If using pandas directly, construct the S3 URI and use df.to_parquet().","Pass the partition_cols=['dt'] and compression='snappy' arguments."]
   },
   {
     id: "logging-config",
@@ -150,7 +158,9 @@ db_password = os.getenv("DB_PASSWORD") # Never hardcode secrets!
 # Inject a correlation ID for tracing a specific pipeline run
 run_id = str(uuid4())
 logger.info("Pipeline started", extra={"correlation_id": run_id})`,
-    difficulty: "Easy"
+    difficulty: "Easy",
+    taskPrompt: "Configure the standard Python logging module to emit JSON formatted logs. Include a unique 'correlation_id' in the log output for distributed tracing.",
+    hints: ["The 'pythonjsonlogger' library allows easy JSON formatting.","Create a StreamHandler and apply the JsonFormatter to it.","Pass extra={'correlation_id': run_id} into your logger calls."]
   },
   {
     id: "dataframe-wrangling",
@@ -181,7 +191,9 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     agg_df['rank'] = agg_df['total_amount'].rank(method='dense', ascending=False)
     
     return agg_df.sort_values('rank')`,
-    difficulty: "Medium"
+    difficulty: "Medium",
+    taskPrompt: "Given a Pandas DataFrame of transactions, group the data by 'user_id', calculate their total spend, filter out users who spent less than 100, and rank the rest in descending order using dense ranking.",
+    hints: ["Use groupby('user_id') and agg(total_amount=('amount', 'sum')).","Filter using a boolean mask: df[df['total_amount'] >= 100].","Use .rank(method='dense', ascending=False) to generate the rank column."]
   },
   {
     id: "concurrency",
@@ -206,7 +218,9 @@ def fetch_urls_concurrently(urls: List[str], max_workers: int = 5) -> List[dict]
             results.append(result)
             
     return results`,
-    difficulty: "Hard"
+    difficulty: "Hard",
+    taskPrompt: "Write a function that downloads data from a list of URLs concurrently using a ThreadPool. Ensure no more than 5 threads are active at once.",
+    hints: ["Import ThreadPoolExecutor from concurrent.futures.","Instantiate it with max_workers=5.","Use executor.map() or a list comprehension with executor.submit() to process the list."]
   },
   {
     id: "oop-structure",
@@ -243,7 +257,9 @@ def get_loader(file_type: str) -> DataLoader:
 
 # Usage
 # df = get_loader("parquet").load("data.parquet")`,
-    difficulty: "Hard"
+    difficulty: "Hard",
+    taskPrompt: "Implement the Factory Design Pattern to dynamically instantiate different FileLoader objects (e.g., CSVLoader, ParquetLoader) based on a provided file extension.",
+    hints: ["Create an abstract base class or simply define common methods for the loaders.","Define concrete classes for CSV and Parquet.","Write a get_loader() function that maps the file extension string to the correct class instance."]
   },
   {
     id: "generators-decorators",
@@ -280,7 +296,9 @@ def process_large_file_in_chunks(filepath: str, chunk_size: int = 1000) -> Gener
 # Usage:
 # for chunk in process_large_file_in_chunks("huge_data.txt"):
 #     write_to_db(chunk)`,
-    difficulty: "Hard"
+    difficulty: "Hard",
+    taskPrompt: "Write a memory-efficient generator function that reads a large file in small chunks (e.g., 1024 bytes) yielding each chunk until the file is fully read.",
+    hints: ["Use the 'yield' keyword to make the function a generator.","Open the file in binary mode ('rb') and use a while True loop.","Break the loop if the chunk read is empty."]
   },
   {
     id: "pytest-mocking",
@@ -318,7 +336,9 @@ def test_s3_upload():
     # Assert successful operation
     response = s3.get_object(Bucket='test-bucket', Key='data.txt')
     assert response['Body'].read() == b'hello world'`,
-    difficulty: "Medium"
+    difficulty: "Medium",
+    taskPrompt: "Write a test function using pytest and the 'moto' library to verify that a file is successfully uploaded to an mock S3 bucket without making actual network requests.",
+    hints: ["Use the @mock_s3 decorator from the moto library.","Initialize a boto3 client inside the test and create the mock bucket first.","Upload the file, then retrieve it and assert its contents match."]
   },
   {
     id: "airflow-taskflow",
@@ -382,7 +402,9 @@ def api_ingestion_dag():
 
 # Instantiate the DAG
 dag_instance = api_ingestion_dag()`,
-    difficulty: "Medium"
+    difficulty: "Medium",
+    taskPrompt: "Define an Airflow DAG using the TaskFlow API (@dag and @task) containing three steps: extract, transform, and load. Pass the output of extract to transform, and transform to load.",
+    hints: ["Decorate the main function with @dag.","Decorate the individual step functions with @task.","Call the functions sequentially, assigning the result of one to a variable and passing it to the next."]
   },
   {
     id: "airflow-jinja",
@@ -426,7 +448,9 @@ with DAG(
 
     # Traditional Bitshift Dependencies
     start_task >> process_task >> end_task`,
-    difficulty: "Hard"
+    difficulty: "Hard",
+    taskPrompt: "Define an Airflow BashOperator task that prints the logical execution date of the DAG run using a Jinja template.",
+    hints: ["Import BashOperator from airflow.operators.bash.","In the bash_command argument, use 'echo {{ ds }}'.","Airflow automatically resolves the {{ ds }} macro at runtime."]
   }
 ];
 
